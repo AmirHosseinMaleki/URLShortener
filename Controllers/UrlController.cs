@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class UrlController : ControllerBase
@@ -17,21 +16,33 @@ public class UrlController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateShortUrl([FromBody] Url url)
     {
-        url.ShortenedUrl = Guid.NewGuid().ToString()[..8];
+        var shortCode = Guid.NewGuid().ToString().Substring(0, 8);
+        url.ShortenedUrl = shortCode;  // Store only the short code in the database
+
         _context.Urls.Add(url);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetUrl), new { id = url.Id }, url);
+        var fullShortUrl = $"{Request.Scheme}://{Request.Host}/{shortCode}";
+        return CreatedAtAction(nameof(GetUrl), new { id = url.Id }, new { fullShortUrl });
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetUrl(int id)
     {
         var url = await _context.Urls.FindAsync(id);
         return url == null ? NotFound() : Ok(url);
     }
+}
 
-    [HttpGet("redirect/{shortUrl}")]
+// New Controller to handle root-level shortened URLs
+[ApiController]
+public class RedirectController : ControllerBase
+{
+    private readonly AppDbContext _context;
+
+    public RedirectController(AppDbContext context) => _context = context;
+
+    [HttpGet("{shortUrl}")]
     public async Task<IActionResult> RedirectToOriginalUrl(string shortUrl)
     {
         var url = await _context.Urls.FirstOrDefaultAsync(u => u.ShortenedUrl == shortUrl);
