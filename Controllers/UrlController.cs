@@ -14,19 +14,21 @@ public class UrlController : ControllerBase
     public UrlController(AppDbContext context) => _context = context;
 
     [HttpPost]
-    public async Task<IActionResult> CreateShortUrl([FromBody] Url url)
+    public async Task<IActionResult> CreateShortUrl([FromBody] UrlCreateDto urlDto)
     {
-        if (string.IsNullOrEmpty(url.OriginalUrl))
+        if (string.IsNullOrEmpty(urlDto.OriginalUrl))
         {
             return BadRequest("Original URL is required.");
         }
 
-        // Generate a short code (e.g., "1a0566ee")
         var shortCode = Guid.NewGuid().ToString().Substring(0, 8);
 
-        // Set the properties on the Url model
-        url.ShortenedUrl = shortCode;
-        url.CreatedAt = DateTime.UtcNow;
+        var url = new Url
+        {
+            OriginalUrl = urlDto.OriginalUrl,
+            ShortenedUrl = shortCode,
+            CreatedAt = DateTime.UtcNow
+        };
 
         _context.Urls.Add(url);
         await _context.SaveChangesAsync();
@@ -34,7 +36,6 @@ public class UrlController : ControllerBase
         var fullShortUrl = $"{Request.Scheme}://{Request.Host}/{shortCode}";
         return CreatedAtAction(nameof(GetUrl), new { id = url.Id }, new { fullShortUrl });
     }
-
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetUrl(int id)
