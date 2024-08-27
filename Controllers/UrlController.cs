@@ -59,6 +59,13 @@ public class UrlController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Url>>> GetAllUrls()
+    {
+        var urls = await _context.Urls.ToListAsync();
+        return Ok(urls);
+    }
 }
 
 // New Controller to handle root-level shortened URLs
