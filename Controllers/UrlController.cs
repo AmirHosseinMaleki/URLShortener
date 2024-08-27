@@ -43,6 +43,22 @@ public class UrlController : ControllerBase
         var url = await _context.Urls.FindAsync(id);
         return url == null ? NotFound() : Ok(url);
     }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteUrl(int id)
+    {
+        var url = await _context.Urls.FindAsync(id);
+
+        if (url == null)
+        {
+            return NotFound();
+        }
+
+        _context.Urls.Remove(url);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
 
 // New Controller to handle root-level shortened URLs
