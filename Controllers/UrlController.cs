@@ -80,6 +80,14 @@ public class RedirectController : ControllerBase
     public async Task<IActionResult> RedirectToOriginalUrl(string shortUrl)
     {
         var url = await _context.Urls.FirstOrDefaultAsync(u => u.ShortenedUrl == shortUrl);
-        return url == null ? NotFound() : Redirect(url.OriginalUrl);
+        if (url == null)
+        {
+            return NotFound();
+        }
+
+        url.ViewCount++;
+        await _context.SaveChangesAsync();
+
+        return Redirect(url.OriginalUrl);
     }
 }

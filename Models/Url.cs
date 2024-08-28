@@ -14,5 +14,7 @@ namespace UrlShortener.Models
         public required string ShortenedUrl { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public int ViewCount { get; set; } = 0;
     }
 }
