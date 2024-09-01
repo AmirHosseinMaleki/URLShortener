@@ -16,5 +16,8 @@ namespace UrlShortener.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public int ViewCount { get; set; } = 0;
+
+        public int UserId { get; set; }
+        public User? User { get; set; }
     }
 }
