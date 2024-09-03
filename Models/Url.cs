@@ -17,7 +17,5 @@ namespace UrlShortener.Models
 
         public int ViewCount { get; set; } = 0;
 
-        public int UserId { get; set; }
-        public User? User { get; set; }
     }
 }
