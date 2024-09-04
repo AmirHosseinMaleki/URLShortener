@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.Data;
@@ -5,6 +6,7 @@ using UrlShortener.Models;
 using UrlShortener.ViewModels;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]/[action]")]
 public class UrlController(AppDbContext context) : ControllerBase
 {
