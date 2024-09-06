@@ -1,23 +1,24 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
-namespace UrlShortener.Models
+namespace UrlShortener.Models;
+
+public class Url
 {
-    public class Url
-    {
-        [Key]
-        public int Id { get; set; }
+    [Key]
+    public int Id { get; set; }
 
-        [Required]
-        public required string OriginalUrl { get; set; }
+    [Required]
+    public required string OriginalUrl { get; set; }
 
-        [Required]
-        public required string ShortenedUrl { get; set; }
+    [Required]
+    public required string ShortenedUrl { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public int ViewCount { get; set; } = 0;
+    public int ViewCount { get; set; } = 0;
 
-        public string UserId { get; set; }
+    public string UserId { get; set; }
 
-    }
+    public virtual IdentityUser User { get; set; }
 }
