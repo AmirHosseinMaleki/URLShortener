@@ -18,7 +18,7 @@ public class Url
 
     public int ViewCount { get; set; } = 0;
 
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     public virtual IdentityUser User { get; set; }
 }
