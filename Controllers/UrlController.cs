@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.Data;
@@ -33,11 +34,13 @@ public class UrlController(AppDbContext context) : ControllerBase
         }
 
         var shortCode = Guid.NewGuid().ToString()[..8];
+        var userId = new IdentityUser().Id;
         var url = new Url
         {
             OriginalUrl = urlDto.OriginalUrl,
             ShortenedUrl = shortCode,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UserId = userId
         };
 
         context.Urls.Add(url);
@@ -56,6 +59,12 @@ public class UrlController(AppDbContext context) : ControllerBase
         {
             return NotFound();
         }
+
+        if (url.UserId != new IdentityUser().Id)
+        {
+            return Unauthorized();
+        }
+
 
         context.Urls.Remove(url);
         await context.SaveChangesAsync();
