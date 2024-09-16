@@ -81,7 +81,6 @@ public class UrlControllerTests
         var result = await controller.Create(urlDto);
 
         var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-        var tt = typeof(CreatedResult);
         var createdUrl = Assert.IsType<Url>(createdResult.Value);
         Assert.Equal("https://google.com", createdUrl.OriginalUrl);
         Assert.NotNull(createdUrl.ShortenedUrl);
@@ -96,4 +95,33 @@ public class UrlControllerTests
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
+
+    [Fact]
+    public async Task Delete_ShouldReturnNoContent_WhenUrlIsDeleted()
+    {
+        var result = await controller.Delete(1);
+
+        Assert.IsType<NoContentResult>(result);
+    }
+
+    [Fact]
+    public async Task Delete_ShouldReturnNotFound_WhenUrlDoesNotExist()
+    {
+        var result = await controller.Delete(999);
+
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task Delete_ShouldReturnUnauthorized_IfUserIsNotOwner()
+    {
+        var url = dbContext.DbContext.Urls.First();
+        url.UserId = "anotherUser";
+        dbContext.DbContext.SaveChanges();
+
+        var result = await controller.Delete(1);
+
+        Assert.IsType<UnauthorizedResult>(result);
+    }
+
 }
