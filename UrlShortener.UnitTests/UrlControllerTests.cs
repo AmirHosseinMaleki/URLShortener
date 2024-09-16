@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Xunit;
 using UrlShortener.UnitTests;
 using UrlShortener.ViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace UrlShortener.UrlShortener.UnitTests;
 
@@ -58,5 +59,41 @@ public class UrlControllerTests
         var result = await controller.GetById(999);
 
         Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task Create_ShouldReturnCreatedResult_WhenValidUrlIsProvided()
+    {
+        var urlDto = new UrlCreateDto("https://google.com");
+
+        var mockHttpContext = new Mock<HttpContext>();
+        var mockRequest = new Mock<HttpRequest>();
+
+        mockRequest.Setup(r => r.Scheme).Returns("https");
+        mockRequest.Setup(r => r.Host).Returns(new HostString("localhost"));
+
+        mockHttpContext.Setup(c => c.Request).Returns(mockRequest.Object);
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = mockHttpContext.Object
+        };
+
+        var result = await controller.Create(urlDto);
+
+        var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+        var tt = typeof(CreatedResult);
+        var createdUrl = Assert.IsType<Url>(createdResult.Value);
+        Assert.Equal("https://google.com", createdUrl.OriginalUrl);
+        Assert.NotNull(createdUrl.ShortenedUrl);
+    }
+
+    [Fact]
+    public async Task Create_ShouldReturnBadRequest_WhenUrlIsNull()
+    {
+        var urlDto = new UrlCreateDto(null);
+
+        var result = await controller.Create(urlDto);
+
+        Assert.IsType<BadRequestObjectResult>(result);
     }
 }
