@@ -22,10 +22,10 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication()
-    .AddCookie(IdentityConstants.ApplicationScheme)
-    .AddBearerToken(IdentityConstants.BearerScheme);
+// builder.Services.AddAuthentication()
+//     .AddCookie(IdentityConstants.ApplicationScheme);
+
+// builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityApiEndpoints<IdentityUser>()
     .AddEntityFrameworkStores<AppDbContext>();
@@ -44,6 +44,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapSwagger().RequireAuthorization();
