@@ -9,7 +9,7 @@ using UrlShortener.ViewModels;
 [ApiController]
 [Authorize]
 [Route("api/[controller]/[action]")]
-public class UrlController(AppDbContext context) : ControllerBase
+public class UrlController(AppDbContext context, UserManager<IdentityUser> userManager) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Url>>> GetAll()
@@ -34,7 +34,7 @@ public class UrlController(AppDbContext context) : ControllerBase
         }
 
         var shortCode = Guid.NewGuid().ToString()[..8];
-        var userId = new IdentityUser().Id;
+        var userId = userManager.GetUserId(HttpContext.User) ?? throw new UnauthorizedAccessException();
         var url = new Url
         {
             OriginalUrl = urlDto.OriginalUrl,

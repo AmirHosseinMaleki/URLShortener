@@ -25,7 +25,7 @@ builder.Services.AddSwaggerGen(options =>
 // builder.Services.AddAuthentication()
 //     .AddCookie(IdentityConstants.ApplicationScheme);
 
-// builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityApiEndpoints<IdentityUser>()
     .AddEntityFrameworkStores<AppDbContext>();
@@ -42,14 +42,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapSwagger().RequireAuthorization();
 
 app.MapIdentityApi<IdentityUser>();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
 
 app.MapControllers();
 
