@@ -54,13 +54,14 @@ public class UrlController(AppDbContext context, UserManager<IdentityUser> userM
     public async Task<IActionResult> Delete(int id)
     {
         var url = await context.Urls.FindAsync(id);
+        var userId = userManager.GetUserId(HttpContext.User) ?? throw new UnauthorizedAccessException();
 
         if (url == null)
         {
             return NotFound();
         }
 
-        if (url.UserId != new IdentityUser().Id)
+        if (url.UserId != userId)
         {
             return Unauthorized();
         }
