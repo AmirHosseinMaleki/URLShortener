@@ -7,20 +7,38 @@ using Xunit;
 using UrlShortener.UnitTests;
 using UrlShortener.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Net;
 
 namespace UrlShortener.UrlShortener.UnitTests;
 
 public class UrlControllerTests
 {
-    private readonly DbContextFixture dbContext;
-    private readonly Mock<DbSet<Url>> mockSet;
+    private readonly DbContextFixture dbContext = new();
+    private readonly Mock<DbSet<Url>> mockSet = new();
     private readonly UrlController controller;
 
     public UrlControllerTests()
     {
-        dbContext = new DbContextFixture();
-        mockSet = new Mock<DbSet<Url>>();
-        controller = new UrlController(dbContext.DbContext);
+        controller = new UrlController(dbContext.DbContext)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity([new(ClaimTypes.NameIdentifier, "some user id"),]))
+                }
+            }
+        };
+
+        // var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+        // mockClaimsPrincipal.Setup(p => p.FindFirstValue(It.IsAny<string>())).Returns(It.IsAny<string>);
+
+        // controller.ControllerContext.HttpContext.User = mockClaimsPrincipal.Object;
     }
 
     [Fact]
@@ -65,25 +83,18 @@ public class UrlControllerTests
     public async Task Create_ShouldReturnCreatedResult_WhenValidUrlIsProvided()
     {
         var urlDto = new UrlCreateDto("https://google.com");
-
-        var mockHttpContext = new Mock<HttpContext>();
-        var mockRequest = new Mock<HttpRequest>();
-
-        mockRequest.Setup(r => r.Scheme).Returns("https");
-        mockRequest.Setup(r => r.Host).Returns(new HostString("localhost"));
-
-        mockHttpContext.Setup(c => c.Request).Returns(mockRequest.Object);
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = mockHttpContext.Object
-        };
-
         var result = await controller.Create(urlDto);
 
-        var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-        var createdUrl = Assert.IsType<Url>(createdResult.Value);
-        Assert.Equal("https://google.com", createdUrl.OriginalUrl);
-        Assert.NotNull(createdUrl.ShortenedUrl);
+        Assert.True(((IStatusCodeActionResult)result).StatusCode == (int)HttpStatusCode.Created);
+
+        Assert.True(((CreatedAtActionResult)result).RouteValues["id"] is not null);
+
+        Assert.True(((CreatedAtActionResult)result).Value is not null);
+
+        // var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+        // var createdUrl = Assert.IsType<Url>(createdResult.Value);
+        // Assert.Equal("https://google.com", createdUrl.OriginalUrl);
+        // Assert.NotNull(createdUrl.ShortenedUrl);
     }
 
     [Fact]

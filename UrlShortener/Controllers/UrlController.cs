@@ -1,5 +1,5 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.Data;
@@ -9,7 +9,7 @@ using UrlShortener.ViewModels;
 [ApiController]
 [Authorize]
 [Route("api/[controller]/[action]")]
-public class UrlController(AppDbContext context, UserManager<IdentityUser> userManager) : ControllerBase
+public class UrlController(AppDbContext context) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Url>>> GetAll()
@@ -34,7 +34,7 @@ public class UrlController(AppDbContext context, UserManager<IdentityUser> userM
         }
 
         var shortCode = Guid.NewGuid().ToString()[..8];
-        var userId = userManager.GetUserId(HttpContext.User) ?? throw new UnauthorizedAccessException();
+        var userId = GetUserId(User) ?? throw new UnauthorizedAccessException();
         var url = new Url
         {
             OriginalUrl = urlDto.OriginalUrl,
@@ -47,14 +47,14 @@ public class UrlController(AppDbContext context, UserManager<IdentityUser> userM
         await context.SaveChangesAsync();
 
         var fullShortUrl = $"{Request.Scheme}://{Request.Host}/{shortCode}";
-        return CreatedAtAction(nameof(GetById), new { id = url.Id }, new { fullShortUrl });
+        return CreatedAtAction(nameof(GetById), new { id = url.Id }, new { NewUrl = fullShortUrl });
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var url = await context.Urls.FindAsync(id);
-        var userId = userManager.GetUserId(HttpContext.User) ?? throw new UnauthorizedAccessException();
+        var userId = GetUserId(User) ?? throw new UnauthorizedAccessException();
 
         if (url == null)
         {
@@ -71,5 +71,10 @@ public class UrlController(AppDbContext context, UserManager<IdentityUser> userM
         await context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    internal static string? GetUserId(ClaimsPrincipal user)
+    {
+        return user.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 }
