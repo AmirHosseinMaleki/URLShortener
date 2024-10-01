@@ -9,16 +9,21 @@ public class RedirectController(AppDbContext context) : ControllerBase
     [HttpGet("{shortUrl}")]
     public async Task<IActionResult> RedirectToOriginalUrl(string shortUrl)
     {
-        var url = await context.Urls.FirstOrDefaultAsync(u => u.ShortenedUrl == shortUrl);
-        if (url == null)
+        var originalUrl = await context.Urls
+                                    .Where(u => u.ShortenedUrl == shortUrl)
+                                    .Select(p => p.OriginalUrl)
+                                    .SingleOrDefaultAsync();
+        if (originalUrl == null)
         {
             return NotFound();
         }
 
-        url.ViewCount++;
+        // url.ViewCount++;
 
-        await context.SaveChangesAsync();
+        // put count as of of the column of url db (computed column in sql server)
 
-        return Redirect(url.OriginalUrl);
+        // await context.SaveChangesAsync();
+
+        return Redirect(originalUrl);
     }
 }
