@@ -110,6 +110,10 @@ public class UrlControllerTests
     [Fact]
     public async Task Delete_ShouldReturnNoContent_WhenUrlIsDeleted()
     {
+
+        var url = dbContext.DbContext.Urls.First();
+        url.UserId = "some user id";
+        dbContext.DbContext.SaveChanges();
         var result = await controller.Delete(1);
 
         Assert.IsType<NoContentResult>(result);
