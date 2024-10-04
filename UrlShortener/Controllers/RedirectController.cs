@@ -22,6 +22,8 @@ public class RedirectController(AppDbContext context) : ControllerBase
 
         // put count as of of the column of url db (computed column in sql server)
 
+        // add new column: IP, OS, Date and Time
+
         // await context.SaveChangesAsync();
 
         return Redirect(originalUrl);

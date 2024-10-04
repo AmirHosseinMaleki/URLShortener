@@ -21,4 +21,7 @@ public class Url
     public required string UserId { get; set; }
 
     public virtual IdentityUser User { get; set; }
+
+    public ICollection<UrlDetails> UrlDetails { get; set; }
+
 }
