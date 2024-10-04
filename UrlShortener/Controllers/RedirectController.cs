@@ -23,6 +23,15 @@ public class RedirectController(AppDbContext context) : ControllerBase
         // put count as of of the column of url db (computed column in sql server)
 
         // add new column: IP, OS, Date and Time
+        var urlDetails = new UrlDetails
+        {
+            IP = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            OS = Request.Headers["User-Agent"].ToString(),  
+            ViewedAt = DateTime.UtcNow,
+            UrlId = url.Id
+        };
+
+        context.UrlDetails.Add(urlDetails);
 
         // await context.SaveChangesAsync();
 
