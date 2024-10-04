@@ -77,4 +77,12 @@ public class UrlController(AppDbContext context) : ControllerBase
     {
         return user.FindFirstValue(ClaimTypes.NameIdentifier);
     }
+
+    [HttpGet("{id:int}/details")]
+    public async Task<IActionResult> GetUrlDetails(int id)
+    {
+        var urlDetails = await context.UrlDetails.Where(ud => ud.UrlId == id).ToListAsync();
+        return Ok(urlDetails);
+    }
+
 }
