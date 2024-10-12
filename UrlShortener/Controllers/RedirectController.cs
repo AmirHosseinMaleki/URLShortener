@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.Data;
+using UrlShortener.Models;
 
 // New Controller to handle root-level shortened URLs
 [ApiController]
@@ -28,7 +29,7 @@ public class RedirectController(AppDbContext context) : ControllerBase
             IP = HttpContext.Connection.RemoteIpAddress?.ToString(),
             OS = Request.Headers["User-Agent"].ToString(),  
             ViewedAt = DateTime.UtcNow,
-            UrlId = url.Id
+            UrlId = originalUrl.Id
         };
 
         context.UrlDetails.Add(urlDetails);
